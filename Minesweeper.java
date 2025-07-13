@@ -10,7 +10,7 @@ public class Minesweeper extends JFrame {
     private static final int CELLEASY = 9;
     private static final int MINEEASY = 10;
     private static final int CELLMEDIUM = 21;
-    private static final int MINEMEDIUM = 54;
+    private static final int MINEMEDIUM = 60;
     private static final int CELLHARD = 33;
     private static final int MINEHARD = 134;
     // -- difficulty settings --
