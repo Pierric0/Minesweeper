@@ -67,7 +67,7 @@ public class Minesweeper extends JFrame {
     public final void newGame(int size, int mines, int width, int height) {
         getContentPane().removeAll();
         setLayout(new GridLayout(size, size));
-        setSize(width, height); // TODO: Size regulieren
+        setSize(width, height);
         setLocationRelativeTo(null);
         cells = new Cell[size][size];
         Cell.setMinesPlaced(false);

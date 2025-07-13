@@ -10,7 +10,6 @@ public class NavBar extends JMenuBar {
     private final JMenu DIFFICULTY;
     private final JMenuItem EASY, MEDIUM, HARD;
 
-    // TODO: this is also part of the difficulty data
     public NavBar(Minesweeper minesweeper) {
 
         setLayout(new FlowLayout(FlowLayout.LEFT));
