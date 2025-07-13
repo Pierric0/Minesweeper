@@ -7,27 +7,43 @@ import javax.swing.*;
 
 public class Cell extends JButton {
 
-    int row, column;
-    boolean isMine = false;
-    boolean revealed = false;
-    int neighborMines = 0;
-    CellState cellState = CellState.nothing;
-    MouseAdapter rightClick;
-    public static Random rand = new Random();
-    public static boolean minesPlaced = false;
-    public static int totalFreeFields; // technically all freefields that have not been revealed yet
+    private final MouseAdapter RIGHTCLICK;
+    private static final Random RAND = new Random();
+
+    private int row, column;
+    private boolean isMine = false;
+    private boolean revealed = false;
+    private int neighborMines = 0;
+    private CellStates cellState = CellStates.nothing;
+
+    private static boolean minesPlaced = false;
+    private static int totalMines;
+    private static int totalFreeFields; // technically all freefields that have not been revealed yet
+
+    public static void setMinesPlaced(boolean minesPlaced) {
+        Cell.minesPlaced = minesPlaced;
+    }
+
+    public static void setTotalMines(int totalMines) {
+        Cell.totalMines = totalMines;
+    }
+
+    public static void setTotalFreeFields(int totalFreeFields) {
+        Cell.totalFreeFields = totalFreeFields;
+    }
 
     public Cell(int row, int col) {
         this.row = row;
         this.column = col;
 
-        setFont(new Font("LastResort", Font.BOLD, 16));
-        addActionListener((e) -> {
+        setFont(new Font("LastResort", Font.BOLD, 18));
+        setMargin(new Insets(2, 2, 2, 2));
+        addActionListener((_) -> {
             if (!minesPlaced) {
-                placeMines(Minesweeper.MINES, this.row, this.column);
+                placeMines(totalMines, this.row, this.column);
                 countAllNeighbors();
             }
-            if (cellState == CellState.nothing) {
+            if (cellState == CellStates.nothing) {
                 if (isMine) {
                     reveal();
                     Minesweeper.gameOverLoss();
@@ -43,7 +59,7 @@ public class Cell extends JButton {
             }
         });
 
-        rightClick = new MouseAdapter() {
+        RIGHTCLICK = new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
@@ -51,26 +67,25 @@ public class Cell extends JButton {
                 }
             }
         };
-        addMouseListener(rightClick);
+        addMouseListener(RIGHTCLICK);
     }
 
     void toggleFlag() {
         if (revealed) {
-
             return;
         }
 
         switch (cellState) {
-            case CellState.nothing:
-                cellState = CellState.flagged;
+            case CellStates.nothing:
+                cellState = CellStates.flagged;
                 setText("🚩");
                 break;
-            case CellState.flagged:
-                cellState = CellState.question;
+            case CellStates.flagged:
+                cellState = CellStates.question;
                 setText("?");
                 break;
-            case CellState.question:
-                cellState = CellState.nothing;
+            case CellStates.question:
+                cellState = CellStates.nothing;
                 setText("");
                 break;
             default:
@@ -90,7 +105,7 @@ public class Cell extends JButton {
             setBackground(Color.RED);
         } else {
             totalFreeFields--;
-            cellState = CellState.nothing; // important for showing gameover screen
+            cellState = CellStates.nothing; // important for showing gameover screen
             if (neighborMines > 0) {
                 setText(Integer.toString(neighborMines));
                 setBackground(Color.LIGHT_GRAY);
@@ -101,9 +116,10 @@ public class Cell extends JButton {
     }
 
     void revealAdjacent() {
+        int size = Minesweeper.getDifficultyPresets().get(Minesweeper.getDifficultyState())[Minesweeper.CELLAMOUNT];
         for (int r = row - 1; r <= row + 1; r++) {
             for (int c = column - 1; c <= column + 1; c++) {
-                if (r >= 0 && r < Minesweeper.SIZE && c >= 0 && c < Minesweeper.SIZE) {
+                if (r >= 0 && r < size && c >= 0 && c < size) {
                     Cell neighbor = Minesweeper.cells[r][c];
                     if (!neighbor.revealed && !neighbor.isMine) {
                         neighbor.reveal();
@@ -117,18 +133,19 @@ public class Cell extends JButton {
     }
 
     void disableRightClick() {
-        removeMouseListener(rightClick);
+        removeMouseListener(RIGHTCLICK);
     }
 
-    public static void setTotalFreeFields(int dim) {
-        totalFreeFields = (dim * dim) - Minesweeper.MINES;
+    public static void calculateTotalFreeFields(int dim) {
+        totalFreeFields = (dim * dim) - totalMines;
     }
 
     private static void placeMines(int mineCount, int clickedRow, int clickedColumn) {
         int placed = 0;
+        int size = Minesweeper.getDifficultyPresets().get(Minesweeper.getDifficultyState())[Minesweeper.CELLAMOUNT];
         while (placed < mineCount) {
-            int row = rand.nextInt(Minesweeper.SIZE);
-            int column = rand.nextInt(Minesweeper.SIZE);
+            int row = RAND.nextInt(size);
+            int column = RAND.nextInt(size);
             if (!Minesweeper.cells[row][column].isMine && !(clickedRow == row && clickedColumn == column)) {
                 Minesweeper.cells[row][column].isMine = true;
                 placed++;
@@ -138,8 +155,9 @@ public class Cell extends JButton {
     }
 
     private static void countAllNeighbors() {
-        for (int r = 0; r < Minesweeper.SIZE; r++) {
-            for (int c = 0; c < Minesweeper.SIZE; c++) {
+        int size = Minesweeper.getDifficultyPresets().get(Minesweeper.getDifficultyState())[Minesweeper.CELLAMOUNT];
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size; c++) {
                 Minesweeper.cells[r][c].neighborMines = countNeighbors(r, c);
             }
         }
@@ -147,9 +165,10 @@ public class Cell extends JButton {
 
     private static int countNeighbors(int row, int column) {
         int count = 0;
+        int size = Minesweeper.getDifficultyPresets().get(Minesweeper.getDifficultyState())[Minesweeper.CELLAMOUNT];
         for (int r = row - 1; r <= row + 1; r++) {
             for (int c = column - 1; c <= column + 1; c++) {
-                if (r >= 0 && r < Minesweeper.SIZE && c >= 0 && c < Minesweeper.SIZE) {
+                if (r >= 0 && r < size && c >= 0 && c < size) {
                     if (Minesweeper.cells[r][c].isMine) {
                         count++;
                     }
