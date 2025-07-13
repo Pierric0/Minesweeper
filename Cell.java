@@ -115,28 +115,11 @@ public class Cell extends JButton {
         }
     }
 
-    void revealAdjacentOld() {
-        int size = Minesweeper.getDifficultyPresets().get(Minesweeper.getDifficultyState())[Minesweeper.CELLAMOUNT];
-        for (int r = row - 1; r <= row + 1; r++) {
-            for (int c = column - 1; c <= column + 1; c++) {
-                if (r >= 0 && r < size && c >= 0 && c < size) {
-                    Cell neighbor = Minesweeper.cells[r][c];
-                    if (!neighbor.revealed && !neighbor.isMine) {
-                        neighbor.reveal();
-                        if (neighbor.neighborMines == 0) {
-                            neighbor.revealAdjacent();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     void revealAdjacent() {
         int size = Minesweeper.getDifficultyPresets().get(Minesweeper.getDifficultyState())[Minesweeper.CELLAMOUNT];
         for (int r = row - 1; r <= row + 1; r++) {
             for (int c = column - 1; c <= column + 1; c++) {
-                if (r >= 0 && r < size && c >= 0 && c < size && (r == row || c == column)) {
+                if (r >= 0 && r < size && c >= 0 && c < size) {
                     Cell neighbor = Minesweeper.cells[r][c];
                     if (!neighbor.revealed && !neighbor.isMine) {
                         neighbor.reveal();
