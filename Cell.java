@@ -37,7 +37,7 @@ public class Cell extends JButton {
         this.column = col;
 
         setFont(new Font("LastResort", Font.BOLD, 18));
-        setMargin(new Insets(2, 2, 2, 2));
+        setMargin(new Insets(0, 0, 0, 0));
         addActionListener((_) -> {
             if (!minesPlaced) {
                 placeMines(totalMines, this.row, this.column);
